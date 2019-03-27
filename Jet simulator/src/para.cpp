@@ -1,0 +1,95 @@
+#include "para.h"
+#include "main.h"
+#include "plane.h"
+
+Para::Para(float x, float y, float z) {
+    this->position = glm::vec3(x, y, z);
+    this->rotation = 0;
+    float width = 1.0f;
+    this->direction = 1;
+    float height =this->height =  0.25f;
+    float depth = 1.0f;
+    float size = 1.5f;
+    this->radius1 = 0.3f; 
+    this->radius2 = 0.1f;
+    this->destroyed = false;
+    this->speed = 0.01f;
+    // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
+    // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
+    int p,q;
+    float rad;
+    int n=20;
+    float l;
+    float cyl_length = 0.3f;
+    GLfloat vertex_buffer_data[1*9*n];
+    for(int k=0;k<1;k++) {
+        // if(k == 0) {l = 0.0f;rad = this->radius1;}
+        l = cyl_length;rad = this->radius2;
+        for(int i=0;i<9*n;i+=9) {
+                p = (i+1)/9;
+                q = p+1;
+                vertex_buffer_data[9*n*k+i] = 0.0f;
+                vertex_buffer_data[9*n*k+i+1] = l;
+                vertex_buffer_data[9*n*k+i+2] = 0.0f;
+                vertex_buffer_data[9*n*k+i+3] = rad*(sin((p*M_PI*2)/n));
+                vertex_buffer_data[9*n*k+i+4] = l;
+                vertex_buffer_data[9*n*k+i+5] = rad*(cos((p*M_PI*2)/n));
+                vertex_buffer_data[9*n*k+i+6] = rad*(sin((q*M_PI*2)/n));
+                vertex_buffer_data[9*n*k+i+7] = l;
+                vertex_buffer_data[9*n*k+i+8] = rad*(cos((q*M_PI*2)/n));
+            }
+    }
+    GLfloat vertex_data[18*360];
+    for(int i=0;i<360*18;i+=18) {
+        vertex_data[i] = this->radius1*cos(glm::radians(float(i/18)));
+        vertex_data[i+1] = 0.0f;
+        vertex_data[i+2] = -this->radius1*sin(glm::radians(float(i/18)));
+        vertex_data[i+3] = this->radius2*cos(glm::radians(float(i/18)));
+        vertex_data[i+4] = cyl_length;
+        vertex_data[i+5] = -this->radius2*sin(glm::radians(float(i/18)));
+        vertex_data[i+6] = this->radius1*cos(glm::radians(float(i/18+1)));
+        vertex_data[i+7] = 0.0f;
+        vertex_data[i+8] = -this->radius1*sin(glm::radians(float(i/18+1)));
+        vertex_data[i+9] = vertex_data[i+6];
+        vertex_data[i+10] = vertex_data[i+7];
+        vertex_data[i+11] = vertex_data[i+8];
+        vertex_data[i+12] = vertex_data[i+3];
+        vertex_data[i+13] = vertex_data[i+4];
+        vertex_data[i+14] = vertex_data[i+5];
+        vertex_data[i+15] = this->radius2*cos(glm::radians(float(i/18+1)));
+        vertex_data[i+16] = cyl_length;
+        vertex_data[i+17] = -this->radius2*sin(glm::radians(float(i/18+1)));
+    }
+    
+    this->objects.push_back(getObj(0.1,0.1,0.1,0,-0.25,0,COLOR_LIGHTRED));
+	this->objects.push_back(create3DObject(GL_TRIANGLES, 1*3*n, vertex_buffer_data, COLOR_YELLOW,GL_FILL)) ;
+    this->objects.push_back(create3DObject(GL_TRIANGLES, 6*360, vertex_data, COLOR_YELLOW, GL_FILL));
+    this->objects.push_back(getObj(0.01,0.25,0.01,-0.1+0.01,0,-0.1+0.01,COLOR_LIGHTRED));
+    this->objects.push_back(getObj(0.01,0.25,0.01,0.1-0.01,0,-0.1+0.01,COLOR_LIGHTRED));
+    this->objects.push_back(getObj(0.01,0.25,0.01,-0.1+0.01,0,0.1-0.01,COLOR_LIGHTRED));
+    this->objects.push_back(getObj(0.01,0.25,0.01,0.1-0.01,0,0.1-0.01,COLOR_LIGHTRED));
+}
+
+void Para::draw(glm::mat4 VP) {
+    Matrices.model = glm::mat4(1.0f);
+    glm::mat4 translate = glm::translate (this->position);    // glTranslatef
+    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
+    // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
+    // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
+    Matrices.model *= (translate * rotate);
+    glm::mat4 MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    for(int i=0;i<this->objects.size();i++) draw3DObject(this->objects[i]);
+}
+
+void Para::set_position(float x, float y,float z) {
+    this->position = glm::vec3(x, y, z);
+}
+
+void Para::tick() {
+    // this->rotation += speed;
+    // this->position.x -= speed;
+    if(this->direction == 1 && this->position.y-this->speed<=-1) this->direction = -1;
+    else if(this->direction == -1 && this->position.y-this->speed>=5) this->direction = 1;
+    this->position.y -= this->direction*this->speed;
+}

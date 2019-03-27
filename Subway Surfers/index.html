@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Subway Surfers</title>
+    <link rel="stylesheet" href="../webgl.css" type="text/css">
+    <style>
+    #game {
+      position: relative;
+    }
+    #text {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      z-index : 10;
+    }
+    </style>
+  </head>
+
+  <body>
+    <div id = "game">
+    <canvas id="glcanvas" width="1280" height="720"> </canvas>
+      <canvas id="text" width="1280" height="720" style="border:2px solid black;"></canvas>
+</div>
+  </body>
+  <p>Score</p>
+  <p id = "score"></p>
+  <script src="./gl-matrix.js"></script>
+  <script src="./textures.js"></script>
+  <script src="./shaders.js"></script>
+  <script src="./primitives.js"></script>
+  <script src="./input.js"></script>
+  <script src="./player.js"></script>
+  <script src="./police.js"></script>
+  <script src="./track.js"></script>
+  <script src="./wall.js"></script>
+  <script src="./tunnel.js"></script>
+  <script src="./train.js"></script>
+  <script src="./powerups.js"></script>
+  <script src="./obstacles.js"></script>
+  <script src="./collisions.js"></script>
+  <script src="./displayscore.js"></script>
+  <script src="./main.js"></script>
+
+
+
+
+</html>
